@@ -51,40 +51,41 @@ function copyToClipboard() {
 const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
 async function playMusic() {
-    try {
-        // 1. Ensure Audio Context is started
+    // 1. FORCE THE AUDIO CONTEXT TO START
+    // This handles the "User Gesture" requirement explicitly
+    if (Tone.context.state !== 'running') {
         await Tone.start();
-        console.log("Audio Context Started");
+        console.log("Audio Context forced to start!");
+    }
 
-        const text = document.getElementById('resultText').innerText;
-        if (text === "--") return;
+    const text = document.getElementById('resultText').innerText;
+    if (!text || text === "--") return;
 
-        const items = text.split(/\s+/);
-        let now = Tone.now();
+    const items = text.split(/\s+/);
+    let now = Tone.now();
+    
+    items.forEach((item, index) => {
+        let notesToPlay = [];
         
-        items.forEach((item, index) => {
-            // 2. Get the notes for the item (works for single notes OR chords)
-            let notesToPlay = [];
-            
-            if (Tonal.Chord.get(item).notes.length > 0) {
-                // It's a chord! Get all notes in the chord
-                notesToPlay = Tonal.Chord.get(item).notes;
-            } else {
-                // It's a single note
-                notesToPlay = [item];
-            }
+        // Check if it's a chord or a single note
+        const chordData = Tonal.Chord.get(item);
+        if (chordData.notes.length > 0) {
+            notesToPlay = chordData.notes;
+        } else {
+            notesToPlay = [item];
+        }
 
-            // 3. Format notes for Tone.js (Ensure they have an octave like '4')
-            const formattedNotes = notesToPlay.map(n => {
-                let simplified = Tonal.Note.simplify(n);
-                return /\d/.test(simplified) ? simplified : simplified + "4";
-            });
-
-            // 4. Schedule the sound
-            // triggerAttackRelease(notes, duration, time)
-            synth.triggerAttackRelease(formattedNotes, "4n", now + (index * 0.5));
+        // Format for Tone.js (Ensure octave exists, e.g., "C4")
+        const formattedNotes = notesToPlay.map(n => {
+            let simplified = Tonal.Note.simplify(n);
+            // If note has no number, add '4' (Middle C range)
+            return /\d/.test(simplified) ? simplified : simplified + "4";
         });
-} catch (error) {
-    console.error("Playback Error:", error);
-}
+
+        // Only play if notes are valid
+        if (formattedNotes.length > 0 && formattedNotes[0] !== "undefined4") {
+            // Schedule playback: 0.5s delay between each item
+            synth.triggerAttackRelease(formattedNotes, "4n", now + (index * 0.5));
+        }
+    });
 }
