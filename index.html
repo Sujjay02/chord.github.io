@@ -3,44 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Music Transposer</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Pro Transposer + Piano</title>
     <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="container">
-        <h1>Music Transposer</h1>
+        <h1>Music Studio Transposer</h1>
         
-        <label>I want to transpose:</label>
-        <select id="typeSelect">
-            <option value="note">Notes (e.g., C D Eb)</option>
-            <option value="chord">Chords (e.g., Am G7 Fmaj7)</option>
-            <option value="scale">Scales (e.g., C major D dorian)</option>
-        </select>
-
-        <textarea id="userInput" placeholder="Enter notes or chords separated by spaces..." rows="3"></textarea>
-        
-        <label>Shift by (semitones):</label>
-        <div class="input-group">
-            <input type="number" id="semitones" value="2">
-        </div>
-
-        <button class="main-btn" onclick="handleTranspose()">Transpose</button>
-
-        <div id="outputSection">
-            <p>Result:</p>
-            <h2 id="resultText">--</h2>
-            
-            <div class="button-group">
-                <button id="copyBtn" onclick="copyToClipboard()" style="display:none; background: #28a745;">
-                    Copy Text
-                </button>
-                <button id="playBtn" onclick="playMusic()" style="display:none; background: #6f42c1;">
-                    🔊 Listen
-                </button>
+        <div class="control-row">
+            <div>
+                <label>Mode</label>
+                <select id="typeSelect">
+                    <option value="note">Notes</option>
+                    <option value="chord">Chords</option>
+                    <option value="numeral">Roman Numerals (I IV V)</option>
+                </select>
+            </div>
+            <div>
+                <label>Key (for Numerals)</label>
+                <input type="text" id="keyInput" value="C" placeholder="e.g. G">
             </div>
         </div>
+
+        <textarea id="userInput" placeholder="Enter music here..." rows="3"></textarea>
+        
+        <div class="control-row">
+            <div>
+                <label>Transpose (Semitones)</label>
+                <input type="number" id="semitones" value="2">
+            </div>
+            <div>
+                <label>Accidentals</label>
+                <select id="accidentalType">
+                    <option value="auto">Auto</option>
+                    <option value="sharp">Force Sharps (#)</option>
+                    <option value="flat">Force Flats (b)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="main-btn" onclick="handleTranspose()">Transpose & Play</button>
+
+        <div id="outputSection">
+            <h2 id="resultText">--</h2>
+            <div class="button-group">
+                <button onclick="copyToClipboard()" class="secondary-btn">Copy</button>
+                <button onclick="playMusic()" class="secondary-btn" style="background:#6f42c1">🔊 Replay</button>
+                <button onclick="clearAll()" class="secondary-btn" style="background:#dc3545">Clear</button>
+            </div>
+        </div>
+
+        <div class="piano" id="piano">
+            </div>
     </div>
     <script src="script.js"></script>
 </body>
