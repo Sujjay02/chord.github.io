@@ -5,7 +5,7 @@ import { getAnalytics } from "firebase/analytics";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// For Firebase JS SDK v7.20.0 and later, measurementId is optiona
 const firebaseConfig = {
   apiKey: "AIzaSyCMeZwHTGIQWOpMfVvNfTO9C_yJkcMnG1U",
   authDomain: "music-transposer-ab68a.firebaseapp.com",
