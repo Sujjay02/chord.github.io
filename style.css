@@ -1,6 +1,72 @@
-body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f4f9; }
-.container { background: white; padding: 2rem; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-input, select, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-button { background: #007bff; color: white; cursor: pointer; border: none; font-weight: bold; }
-button:hover { background: #0056b3; }
-#resultText { color: #007bff; text-align: center; }
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    display: flex; 
+    justify-content: center; 
+    padding: 20px; 
+    background: #f0f2f5; 
+    color: #333;
+}
+
+.container { 
+    background: white; 
+    padding: 2rem; 
+    border-radius: 15px; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+    width: 100%; 
+    max-width: 450px; 
+}
+
+h1 { text-align: center; color: #222; margin-bottom: 1.5rem; }
+
+label { font-weight: bold; font-size: 0.9rem; display: block; margin-top: 10px; }
+
+input, select, textarea, .main-btn { 
+    width: 100%; 
+    padding: 12px; 
+    margin: 8px 0; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    box-sizing: border-box; 
+    font-size: 1rem;
+}
+
+textarea { font-family: monospace; resize: vertical; }
+
+.main-btn { 
+    background: #007bff; 
+    color: white; 
+    cursor: pointer; 
+    border: none; 
+    font-weight: bold; 
+    transition: background 0.2s;
+    margin-top: 15px;
+}
+
+.main-btn:hover { background: #0056b3; }
+
+#outputSection { 
+    margin-top: 25px; 
+    padding-top: 20px; 
+    border-top: 2px solid #eee; 
+    text-align: center; 
+}
+
+#resultText { 
+    color: #007bff; 
+    word-wrap: break-word; 
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.button-group { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+
+.button-group button { 
+    flex: 1; 
+    padding: 10px; 
+    border: none; 
+    border-radius: 6px; 
+    color: white; 
+    cursor: pointer; 
+    font-weight: 600; 
+}
