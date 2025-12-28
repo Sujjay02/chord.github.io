@@ -3,102 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Studio Transposer</title>
-    
+    <title>Pro Music Transposer</title>
     <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
+    <script src="https://unpkg.com/vexflow/releases/vexflow-min.js"></script>
     <style>
-        :root {
-            --bg: #121212;
-            --card: #1e1e1e;
-            --accent: #00d4ff;
-            --text: #e0e0e0;
-            --white-key: #ffffff;
-            --black-key: #333;
-        }
-
-        body { 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            display: flex; justify-content: center; padding: 20px;
-        }
-
-        .container { 
-            background: var(--card); padding: 2rem; border-radius: 20px; 
-            width: 100%; max-width: 600px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        /* Modal-style Auth */
-        #authModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 1000; display: none; 
-            justify-content: center; align-items: center;
-        }
-
-        h1, h2 { text-align: center; color: var(--accent); }
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #00d4ff; --text: #e0e0e0; --white-key: #ffffff; --black-key: #333; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .container { background: var(--card); padding: 2rem; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        h1 { text-align: center; color: var(--accent); }
         .control-row { display: flex; gap: 15px; margin-bottom: 10px; }
         .control-row div { flex: 1; }
-
-        input, select, textarea { 
-            width: 100%; background: #2d2d2d; border: 1px solid #444; 
-            color: white; padding: 12px; border-radius: 8px; margin-top: 5px;
-            box-sizing: border-box; font-size: 1rem;
-        }
-
-        .main-btn { 
-            width: 100%; background: var(--accent); color: #000; font-weight: bold;
-            padding: 15px; border: none; border-radius: 8px; cursor: pointer; 
-            margin-top: 20px; font-size: 1.1rem;
-        }
-
+        label { font-size: 0.8rem; font-weight: bold; color: #888; }
+        input, select, textarea { width: 100%; background: #2d2d2d; border: 1px solid #444; color: white; padding: 12px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; }
+        .main-btn { width: 100%; background: var(--accent); color: #000; font-weight: bold; padding: 15px; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; font-size: 1.1rem; }
         #outputSection { background: #2d2d2d; margin-top: 25px; padding: 20px; border-radius: 10px; text-align: center; }
-        #resultText { color: var(--accent); font-size: 1.8rem; margin: 10px 0; }
-
+        #resultText { color: var(--accent); font-size: 1.8rem; margin: 10px 0; min-height: 40px; }
         .button-group { display: flex; gap: 10px; margin-top: 15px; }
         .secondary-btn { flex: 1; padding: 10px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; }
-
-        /* Piano UI */
         .piano { display: flex; justify-content: center; height: 100px; margin-top: 30px; position: relative; }
         .key { border: 1px solid #888; background: var(--white-key); width: 35px; height: 100%; border-radius: 0 0 5px 5px; z-index: 1; box-sizing: border-box; }
         .key.black { background: var(--black-key); width: 22px; height: 60%; margin-left: -11px; margin-right: -11px; z-index: 2; border: none; }
         .key.active { background: var(--accent) !important; transform: translateY(2px); }
-
-        #songsList li { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #2d2d2d; padding: 10px; margin-bottom: 5px; border-radius: 5px;
-        }
-        
-        .auth-status { text-align: right; margin-bottom: 10px; font-size: 0.8rem; }
+        #sheetMusic { background: white; margin-top: 20px; padding: 10px; border-radius: 10px; overflow-x: auto; display: flex; justify-content: center; min-height: 150px; }
     </style>
 </head>
 <body>
-
-    <div id="authModal">
-        <div class="container" style="max-width:350px;">
-            <button onclick="closeAuth()" style="float:right; background:none; border:none; color:white; cursor:pointer;">✕</button>
-            <h2 id="authTitle">Sign In</h2>
-            <input type="email" id="authEmail" placeholder="Email">
-            <input type="password" id="authPassword" placeholder="Password">
-            <button onclick="handleAuth()" class="main-btn">Continue</button>
-            <p style="text-align:center; margin-top:15px; cursor:pointer; font-size:0.9rem;" onclick="toggleAuthMode()" id="toggleText">
-                Don't have an account? Sign Up
-            </p>
-        </div>
-    </div>
-
     <div class="container">
-        <div class="auth-status">
-            <span id="userGreeting">Guest Mode</span>
-            <button id="authBtn" onclick="openAuth()" style="background:none; border:none; color:var(--accent); cursor:pointer; text-decoration:underline; margin-left:10px;">Sign In</button>
-        </div>
-        
         <h1>Studio Transposer</h1>
-        
         <div class="control-row">
             <div>
                 <label>Mode</label>
@@ -113,40 +45,191 @@
                 <input type="text" id="keyInput" value="C">
             </div>
         </div>
-
         <textarea id="userInput" placeholder="Enter music (e.g. C E G)" rows="3"></textarea>
-        
         <div class="control-row">
             <div><label>Shift (Semitones)</label><input type="number" id="semitones" value="2"></div>
             <div><label>Accidentals</label><select id="accidentalType"><option value="auto">Auto</option><option value="sharp"># Sharps</option><option value="flat">b Flats</option></select></div>
         </div>
-
+        <div class="control-row">
+            <div><label>Tempo (BPM)</label><input type="number" id="tempo" value="120" min="40" max="280"></div>
+            <div><label>Sound</label><select id="soundType"><option value="triangle">Triangle</option><option value="sine">Sine</option><option value="square">Square</option><option value="sawtooth">Sawtooth</option></select></div>
+        </div>
         <button class="main-btn" onclick="handleTranspose()">Transpose & Play</button>
-
         <div id="outputSection">
             <h2 id="resultText">--</h2>
             <div class="button-group">
                 <button onclick="copyToClipboard()" class="secondary-btn" style="background:#444">Copy</button>
                 <button onclick="playMusic()" class="secondary-btn" style="background:#6f42c1">🔊 Listen</button>
+                <button onclick="clearAll()" class="secondary-btn" style="background:#dc3545">Clear</button>
             </div>
         </div>
-
-        <div id="librarySection" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid #444;">
-            <label>Save to Library</label>
-            <div class="control-row">
-                <input type="text" id="songTitle" placeholder="Song Name">
-                <button onclick="saveSong()" class="secondary-btn" style="background:#28a745; max-width:100px;">Save</button>
-            </div>
-            <ul id="songsList"></ul>
-        </div>
-        
-        <div id="guestMsg" style="text-align:center; color:#888; margin-top:20px; font-size:0.9rem;">
-            Sign in to save songs to your library.
-        </div>
-
+        <div id="sheetMusic"></div>
         <div class="piano" id="piano"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        const pianoContainer = document.getElementById('piano');
+
+        // Build Piano keys
+        const pianoNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        for (let i = 0; i < 24; i++) {
+            const n = pianoNotes[i % 12];
+            const key = document.createElement('div');
+            key.className = `key ${n.includes('#') ? 'black' : ''}`;
+            key.dataset.note = `${n}${Math.floor(i/12) + 4}`;
+            pianoContainer.appendChild(key);
+        }
+
+        function handleTranspose() {
+            const type = document.getElementById('typeSelect').value;
+            const input = document.getElementById('userInput').value.trim();
+            const semitones = parseInt(document.getElementById('semitones').value);
+            const keySig = document.getElementById('keyInput').value;
+            const accidental = document.getElementById('accidentalType').value;
+            
+            if (!input) return;
+            const interval = Tonal.Interval.fromSemitones(semitones);
+            const items = input.split(/\s+/); 
+
+            const transposedItems = items.map(item => {
+                try {
+                    let res;
+                    // FIX: Ensure we don't accidentally turn a note into a chord here
+                    if (type === 'numeral') {
+                        const chordName = Tonal.Progression.fromRomanNumerals(keySig, [item])[0];
+                        res = Tonal.Chord.transpose(chordName, interval);
+                    } else if (type === 'chord') {
+                        res = Tonal.Chord.transpose(item, interval);
+                    } else {
+                        // STRICT NOTE MODE: Only transpose as a single note
+                        res = Tonal.Note.transpose(item, interval);
+                    }
+
+                    if (accidental === 'sharp') res = Tonal.Note.simplify(res).replace(/b/g, '#');
+                    else if (accidental === 'flat') res = Tonal.Note.enharmonic(res);
+                    else res = Tonal.Note.simplify(res);
+                    
+                    return res;
+                } catch (e) { return item; }
+            });
+
+            document.getElementById('resultText').innerText = transposedItems.join(" ");
+            renderSheetMusic(transposedItems);
+            playMusic();
+        }
+
+        async function playMusic() {
+            if (Tone.context.state !== 'running') await Tone.start();
+            const type = document.getElementById('typeSelect').value;
+            const text = document.getElementById('resultText').innerText;
+            const bpm = parseInt(document.getElementById('tempo').value) || 120;
+            const soundType = document.getElementById('soundType').value;
+
+            if (text === "--") return;
+
+            synth.set({ oscillator: { type: soundType } });
+            const items = text.split(/\s+/);
+            let now = Tone.now();
+            const beatDuration = 60 / bpm;
+            
+            items.forEach((item, index) => {
+                let notesToPlay = [];
+
+                // STRICT PLAYBACK MODE
+                if (type === 'note') {
+                    // Force only the root note to play
+                    notesToPlay = [item];
+                } else {
+                    // Allow chord tones for Chords and Numerals
+                    const chordNotes = Tonal.Chord.get(item).notes;
+                    notesToPlay = chordNotes.length > 0 ? chordNotes : [item];
+                }
+                
+                const formatted = notesToPlay.map(n => {
+                    let s = Tonal.Note.simplify(n);
+                    let fullNote = /\d/.test(s) ? s : s + "4";
+                    
+                    // Highlight Logic
+                    setTimeout(() => {
+                        const k = document.querySelector(`[data-note="${fullNote}"]`);
+                        if (k) {
+                            k.classList.add('active');
+                            setTimeout(() => k.classList.remove('active'), 400);
+                        }
+                    }, (now + (index * beatDuration) - Tone.now()) * 1000);
+
+                    return fullNote;
+                });
+
+                synth.triggerAttackRelease(formatted, "4n", now + (index * beatDuration));
+            });
+        }
+
+        function renderSheetMusic(items) {
+            const div = document.getElementById('sheetMusic');
+            div.innerHTML = '';
+            if (!items || items.length === 0) return;
+
+            const VF = Vex.Flow;
+            const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+            
+            // Calculate width dynamically to allow scrolling for long progressions
+            const width = Math.max(div.clientWidth, items.length * 60 + 50);
+            renderer.resize(width, 150);
+            
+            const context = renderer.getContext();
+            const stave = new VF.Stave(10, 20, width - 20);
+            stave.addClef("treble").setContext(context).draw();
+
+            const type = document.getElementById('typeSelect').value;
+
+            const notes = items.map(item => {
+                let keys = [];
+                // Determine which notes to draw (Single note vs Chord)
+                if (type === 'note') {
+                    keys = [item];
+                } else {
+                    const c = Tonal.Chord.get(item);
+                    keys = c.empty ? [item] : c.notes;
+                }
+
+                // Convert Tonal notes (e.g., "C#") to VexFlow keys (e.g., "c#/4")
+                const vfKeys = keys.map(k => {
+                    let s = Tonal.Note.simplify(k);
+                    if (!s) return "b/4"; // Fallback for invalid notes
+                    if (!/\d/.test(s)) s += "4"; // Default to 4th octave
+                    const match = s.match(/^([A-G])([#b]*)(\d+)$/);
+                    if (!match) return "b/4";
+                    return `${match[1].toLowerCase()}${match[2]}/${match[3]}`;
+                });
+
+                const staveNote = new VF.StaveNote({ keys: vfKeys, duration: "q" });
+                
+                // Add accidentals (sharps/flats) where needed
+                vfKeys.forEach((key, i) => {
+                    const acc = key.split("/")[0].substring(1);
+                    if (acc) staveNote.addModifier(new VF.Accidental(acc), i);
+                });
+                return staveNote;
+            });
+
+            const voice = new VF.Voice({num_beats: notes.length, beat_value: 4});
+            voice.addTickables(notes);
+            
+            new VF.Formatter().joinVoices([voice]).format([voice], width - 50);
+            voice.draw(context, stave);
+        }
+
+        function clearAll() {
+            document.getElementById('userInput').value = '';
+            document.getElementById('resultText').innerText = '--';
+            document.getElementById('sheetMusic').innerHTML = '';
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(document.getElementById('resultText').innerText);
+        }
+    </script>
 </body>
 </html>
