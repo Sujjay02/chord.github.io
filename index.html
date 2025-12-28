@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Universal Music Transposer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Music Transposer</h1>
+        
+        <label>I want to transpose a:</label>
+        <select id="typeSelect">
+            <option value="note">Single Note (e.g., C#)</option>
+            <option value="chord">Chord (e.g., Am7)</option>
+            <option value="scale">Scale (e.g., C major)</option>
+        </select>
+
+        <input type="text" id="userInput" placeholder="Enter here...">
+        
+        <label>Shift by (semitones):</label>
+        <input type="number" id="semitones" value="2">
+
+        <button onclick="handleTranspose()">Transpose</button>
+
+        <div id="outputSection">
+            <p>Result:</p>
+            <h2 id="resultText">--</h2>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
