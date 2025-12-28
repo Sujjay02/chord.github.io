@@ -47,29 +47,46 @@ function handleTranspose() {
 }
 
 async function playMusic() {
-    await Tone.start();
-    const items = document.getElementById('resultText').innerText.split(/\s+/);
+    if (Tone.context.state !== 'running') await Tone.start();
+    
+    // Get the current mode from the dropdown
+    const type = document.getElementById('typeSelect').value;
+    const text = document.getElementById('resultText').innerText;
+    if (text === "--") return;
+
+    const items = text.split(/\s+/);
     let now = Tone.now();
     
     items.forEach((item, index) => {
-        let notesToPlay = Tonal.Chord.get(item).notes.length > 0 ? Tonal.Chord.get(item).notes : [item];
+        let notesToPlay = [];
+
+        // 1. Strictly follow the user's chosen mode
+        if (type === 'chord' || type === 'numeral') {
+            // In these modes, we treat it as a chord and play all notes
+            const chordNotes = Tonal.Chord.get(item).notes;
+            notesToPlay = chordNotes.length > 0 ? chordNotes : [item];
+        } else {
+            // In 'note' mode, we ONLY play the single note
+            notesToPlay = [item];
+        }
         
         const formatted = notesToPlay.map(n => {
             let s = Tonal.Note.simplify(n);
-            let final = /\d/.test(s) ? s : s + "4";
+            let fullNote = /\d/.test(s) ? s : s + "4";
             
             // Highlight Piano Key
             setTimeout(() => {
-                const key = document.querySelector(`[data-note="${final}"]`);
-                if (key) {
-                    key.classList.add('active');
-                    setTimeout(() => key.classList.remove('active'), 400);
+                const k = document.querySelector(`[data-note="${fullNote}"]`);
+                if (k) {
+                    k.classList.add('active');
+                    setTimeout(() => k.classList.remove('active'), 400);
                 }
             }, (now + (index * 0.5) - Tone.now()) * 1000);
 
-            return final;
+            return fullNote;
         });
 
+        // Trigger the sound (Single note or full chord)
         synth.triggerAttackRelease(formatted, "4n", now + (index * 0.5));
     });
 }
