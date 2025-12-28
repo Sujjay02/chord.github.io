@@ -98,3 +98,63 @@ function clearAll() {
 function copyToClipboard() {
     navigator.clipboard.writeText(document.getElementById('resultText').innerText);
 }
+
+// Load songs from memory as soon as the page opens
+document.addEventListener('DOMContentLoaded', displaySongs);
+
+function saveSong() {
+    const title = document.getElementById('songTitle').value.trim();
+    const result = document.getElementById('resultText').innerText;
+
+    if (!title || result === "--") {
+        alert("Please enter a title and transpose something first!");
+        return;
+    }
+
+    const song = {
+        id: Date.now(),
+        title: title,
+        data: result
+    };
+
+    // Get existing songs or start a new list
+    let library = JSON.parse(localStorage.getItem('myTransposerLibrary')) || [];
+    library.push(song);
+    
+    // Save back to browser memory
+    localStorage.setItem('myTransposerLibrary', JSON.stringify(library));
+    
+    document.getElementById('songTitle').value = ""; // Clear title input
+    displaySongs();
+}
+
+function displaySongs() {
+    const list = document.getElementById('songsList');
+    const library = JSON.parse(localStorage.getItem('myTransposerLibrary')) || [];
+    
+    list.innerHTML = library.map(song => `
+        <li style="display: flex; justify-content: space-between; background: #2d2d2d; padding: 8px; border-radius: 5px; margin-bottom: 5px; font-size: 0.9rem;">
+            <span><strong>${song.title}:</strong> ${song.data}</span>
+            <button onclick="deleteSong(${song.id})" style="background:none; border:none; color:#ff4444; cursor:pointer;">✕</button>
+        </li>
+    `).join('');
+}
+
+function deleteSong(id) {
+    let library = JSON.parse(localStorage.getItem('myTransposerLibrary')) || [];
+    library = library.filter(s => s.id !== id);
+    localStorage.setItem('myTransposerLibrary', JSON.stringify(library));
+    displaySongs();
+}
+
+function downloadSongAsFile() {
+    const title = document.getElementById('songTitle').value || "transposed-song";
+    const content = document.getElementById('resultText').innerText;
+    
+    const element = document.createElement('a');
+    const file = new Blob([content], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `${title}.txt`;
+    document.body.appendChild(element); 
+    element.click();
+}
