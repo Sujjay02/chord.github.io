@@ -1,5 +1,3 @@
-// Initialize a simple synth for the "Listen" feature
-const synth = new Tone.Synth().toDestination();
 
 function handleTranspose() {
     const type = document.getElementById('typeSelect').value;
@@ -49,25 +47,44 @@ function copyToClipboard() {
     });
 }
 
-async function playMusic() {
-    await Tone.start(); // Required to unlock audio in browsers
-    
-    const text = document.getElementById('resultText').innerText;
-    const items = text.split(/\s+/);
-    let time = Tone.now();
-    
-    items.forEach(item => {
-        // Find a playable note. If it's a chord, get the root note.
-        let noteName = Tonal.Note.simplify(item) || Tonal.Chord.get(item).notes[0];
-        
-        // Add a default octave (4) if the user didn't provide one
-        if (noteName && !/\d/.test(noteName)) {
-            noteName += "4";
-        }
+// Use a PolySynth so it can play multiple notes at once if needed
+const synth = new Tone.PolySynth(Tone.Synth).toDestination();
 
-        if (noteName && Tone.Frequency(noteName).isValid) {
-            synth.triggerAttackRelease(noteName, "8n", time);
-            time += 0.4; // Delay between notes
-        }
-    });
+async function playMusic() {
+    try {
+        // 1. Ensure Audio Context is started
+        await Tone.start();
+        console.log("Audio Context Started");
+
+        const text = document.getElementById('resultText').innerText;
+        if (text === "--") return;
+
+        const items = text.split(/\s+/);
+        let now = Tone.now();
+        
+        items.forEach((item, index) => {
+            // 2. Get the notes for the item (works for single notes OR chords)
+            let notesToPlay = [];
+            
+            if (Tonal.Chord.get(item).notes.length > 0) {
+                // It's a chord! Get all notes in the chord
+                notesToPlay = Tonal.Chord.get(item).notes;
+            } else {
+                // It's a single note
+                notesToPlay = [item];
+            }
+
+            // 3. Format notes for Tone.js (Ensure they have an octave like '4')
+            const formattedNotes = notesToPlay.map(n => {
+                let simplified = Tonal.Note.simplify(n);
+                return /\d/.test(simplified) ? simplified : simplified + "4";
+            });
+
+            // 4. Schedule the sound
+            // triggerAttackRelease(notes, duration, time)
+            synth.triggerAttackRelease(formattedNotes, "4n", now + (index * 0.5));
+        });
+} catch (error) {
+    console.error("Playback Error:", error);
+}
 }
