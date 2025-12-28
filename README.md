@@ -3,7 +3,7 @@
 A simple, powerful web-based tool to transpose notes, chords, and scales in real-time. Built with HTML, CSS, JavaScript, and the [Tonal.js](https://github.com/tonaljs/tonal) library.
 
 ## 🚀 Live Demo
-**[Live Demo Here](spiffy-manatee-8cc4ee.netlify.app)**
+**[Live Demo Here](/spiffy-manatee-8cc4ee.netlify.app)**
 
 ## ✨ Features
 * **Note Transposition:** Quickly shift individual notes (e.g., C# to Eb).
