@@ -60,6 +60,7 @@
             <div class="button-group">
                 <button onclick="copyToClipboard()" class="secondary-btn" style="background:#444">Copy</button>
                 <button onclick="playMusic()" class="secondary-btn" style="background:#6f42c1">🔊 Listen</button>
+                <button onclick="downloadSheetMusic()" class="secondary-btn" style="background:#28a745">⬇ Sheet</button>
                 <button onclick="clearAll()" class="secondary-btn" style="background:#dc3545">Clear</button>
             </div>
         </div>
@@ -235,6 +236,23 @@
 
         function copyToClipboard() {
             navigator.clipboard.writeText(document.getElementById('resultText').innerText);
+        }
+
+        function downloadSheetMusic() {
+            const div = document.getElementById('sheetMusic');
+            const svg = div.querySelector('svg');
+            if (!svg) return;
+            
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = "sheet-music.svg";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
