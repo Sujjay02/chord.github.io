@@ -194,12 +194,18 @@
                     keys = c.empty ? [item] : c.notes;
                 }
 
-                // Convert Tonal notes (e.g., "C#") to VexFlow keys (e.g., "c#/4")
-                const vfKeys = keys.map(k => {
+                // Process notes: simplify, add default octave, and sort by pitch (Required by VexFlow)
+                const processedNotes = keys.map(k => {
                     let s = Tonal.Note.simplify(k);
-                    if (!s) return "b/4"; // Fallback for invalid notes
+                    if (!s) return null;
                     if (!/\d/.test(s)) s += "4"; // Default to 4th octave
-                    const match = s.match(/^([A-G])([#b]*)(\d+)$/);
+                    return { name: s, midi: Tonal.Note.midi(s) };
+                }).filter(n => n && n.midi !== null).sort((a, b) => a.midi - b.midi);
+
+                if (processedNotes.length === 0) return new VF.StaveNote({ keys: ["b/4"], duration: "q" });
+
+                const vfKeys = processedNotes.map(n => {
+                    const match = n.name.match(/^([A-G])([#b]*)(\d+)$/);
                     if (!match) return "b/4";
                     return `${match[1].toLowerCase()}${match[2]}/${match[3]}`;
                 });
